@@ -5,7 +5,9 @@ import time
 from selenium.webdriver.common.keys import Keys
 
 options = webdriver.ChromeOptions()
-# options.add_argument('headless')  # 크롤링하는 웹 브라우저를 볼 수 없음
+options.add_argument('headless')  # 크롤링하는 웹 브라우저를 볼 수 없음
+options.add_argument('window-size=1920x1080')
+options.add_argument("user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36")  # 브라우저 보려면 여기까지 주석
 options.add_argument('lang=ko_KR')
 options.add_argument('disable_gpu')
 
