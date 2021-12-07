@@ -33,10 +33,7 @@ class Exam(QWidget, form_window):
 
     def cmb_titles_slot(self):
         title = self.cmb_titles.currentText()
-        movie_idx = self.df_reviews[self.df_reviews['titles'] == title].index[0]  # 해당 영화제목의 위치를 받는다.
-        cosine_sim = linear_kernel(self.Tfidf_metrix[movie_idx], self.Tfidf_metrix)
-        recommendation_title = self.getRecommendation(cosine_sim)
-        recommendation_title = '\n'.join(list(recommendation_title))
+        recommendation_title = self.recommend_by_movie_title(title)
         self.lbl_recommend.setText(recommendation_title)
 
     def getRecommendation(self, cosine_sim):
@@ -49,30 +46,47 @@ class Exam(QWidget, form_window):
 
     def btn_recommend_slot(self):
         key_word = self.le_keyword.text()
-        if key_word in self.titles:
-            movie_idx = self.df_reviews[self.df_reviews['titles'] == key_word].index[0]  # 해당 영화제목의 위치를 받는다.
-            cosine_sim = linear_kernel(self.Tfidf_metrix[movie_idx], self.Tfidf_metrix)
-            recommendation_title = self.getRecommendation(cosine_sim)
-            recommendation_title = '\n'.join(list(recommendation_title))
-            self.lbl_recommend.setText(recommendation_title)
-        else:
-            key_word = key_word.split()
-            sentence = [key_word[0]] * 11
-            sim_word = self.embedding_model.wv.most_similar(key_word[0], topn=10)  # 유사단어 10개를 받는다.
-            words = []
-            for word, _ in sim_word:  # 앞에는 단어, 뒤에는 유사도
-                words.append(word)
-            print(words)
+        if key_word:
+            if key_word in self.titles:
+                recommendation_title = self.recommend_by_movie_title(key_word)
+                self.lbl_recommend.setText(recommendation_title)
+            else:
+                key_word = key_word.split()
+                if len(key_word) > 10:
+                    sentence = ' '.join(key_word)
+                    recommendation_title = self.recommend_by_sentence(sentence)
+                    self.lbl_recommend.setText(recommendation_title)
+                else:
+                    sentence = [key_word[0]] * 11
+                    try:
+                        sim_word = self.embedding_model.wv.most_similar(key_word[0], topn=10)  # 유사단어 10개를 받는다.
+                    except:
+                        self.lbl_recommend.setText('제가 모르는 단어네요!')
+                        return
+                    words = []
+                    for word, _ in sim_word:  # 앞에는 단어, 뒤에는 유사도
+                        words.append(word)
+                    print(words)
 
-            for i, word in enumerate(words):
-                sentence += [word] * (10 - i)  # 유사한 단어들이 반복된다.
-            sentence = ' '.join(sentence)
-            print(sentence)
-            sentence_vec = self.Tfidf.transform([sentence])
-            cosine_sim = linear_kernel(sentence_vec, self.Tfidf_metrix)
-            recommendation_title = self.getRecommendation(cosine_sim)
-            recommendation_title = '\n'.join(list(recommendation_title))
-            self.lbl_recommend.setText(recommendation_title)
+                    for i, word in enumerate(words):
+                        sentence += [word] * (10 - i)  # 유사한 단어들이 반복된다.
+                    sentence = ' '.join(sentence)
+                    recommendation_title = self.recommend_by_sentence(sentence)
+                    self.lbl_recommend.setText(recommendation_title)
+
+    def recommend_by_movie_title(self, title):
+        movie_idx = self.df_reviews[self.df_reviews['titles'] == title].index[0]  # 해당 영화제목의 위치를 받는다.
+        cosine_sim = linear_kernel(self.Tfidf_metrix[movie_idx], self.Tfidf_metrix)
+        recommendation_title = self.getRecommendation(cosine_sim)
+        recommendation_title = '\n'.join(list(recommendation_title))
+        return recommendation_title
+
+    def recommend_by_sentence(self, sentence):
+        sentence_vec = self.Tfidf.transform([sentence])
+        cosine_sim = linear_kernel(sentence_vec, self.Tfidf_metrix)
+        recommendation_title = self.getRecommendation(cosine_sim)
+        recommendation_title = '\n'.join(list(recommendation_title))
+        return recommendation_title
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

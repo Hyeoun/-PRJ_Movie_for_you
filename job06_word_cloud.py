@@ -16,6 +16,9 @@ rc('font', family=font_name)
 df = pd.read_csv('./crawling_data/cleaned_review_2015_2021.csv')
 print(df.head())
 
+# words = df[df['titles'] == '조커 (Joker)']['cleaned_sentences']
+# words = words.iloc[0].split()
+# ======================================================
 words = df.iloc[1, 1]
 words = words.split()
 print(words)
