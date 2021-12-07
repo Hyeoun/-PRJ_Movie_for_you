@@ -31,7 +31,7 @@ plt.imshow(wordcloud_img, interpolation='bilinear')
 plt.axis('off')
 plt.show()
 
-alice_mask = np.array(Image.open('./alice_mask.png'))
+alice_mask = np.array(Image.open('./bin_mask.jpg'))
 
 stopwords = ['영화', '감독', '개봉', '개봉일', '촬영', '관객', '관람', '주인공', '출연', '배우', '평점', '들이다', '푸다', '리뷰', '네이버']
 wordcloud_img = WordCloud(background_color='white', max_words=2000, font_path=font_path, collocations=False, stopwords=stopwords, mask=alice_mask).generate(df.cleaned_sentences[3])
